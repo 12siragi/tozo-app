@@ -1,17 +1,34 @@
-// src/hooks/useAuthentication.ts (or .js if you're not using TypeScript)
 import { useState, useEffect } from 'react';
+import jwtDecode from 'jwt-decode';
 
 function useAuthentication() {
     const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
-        // Check if token exists in localStorage
         const token = localStorage.getItem('access_token');
-        setIsAuthorized(!!token);  // Set isAuthorized to true if token exists
+
+        if (token) {
+            try {
+                const decodedToken = jwtDecode<{ exp: number }>(token);
+
+                // Check if token is expired
+                if (decodedToken.exp * 1000 < Date.now()) {
+                    localStorage.removeItem('access_token');
+                    setIsAuthorized(false);
+                } else {
+                    setIsAuthorized(true);
+                }
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                localStorage.removeItem('access_token');
+                setIsAuthorized(false);
+            }
+        } else {
+            setIsAuthorized(false);
+        }
     }, []);
 
     const logout = () => {
-        // Remove token from localStorage on logout
         localStorage.removeItem('access_token');
         setIsAuthorized(false);
     };

@@ -1,9 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import RegisterForm from '../components/RegisterForm';
 
-const RegisterPage = () => {
+const RegisterPage: React.FC = () => {
+  const navigate = useNavigate(); // Hook for navigation
+
   const handleRegisterSuccess = () => {
     console.log('User registered successfully!');
+    navigate('/login'); // Redirect to the login page
   };
 
   return (

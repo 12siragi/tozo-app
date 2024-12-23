@@ -1,4 +1,19 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import LogoutButton from './LogoutButton'; 
+
+const NavbarLink: React.FC<{ href: string; label: string }> = ({ href, label }) => {
+  return (
+    <li>
+      <Link
+        to={href} // Use 'to' for navigation with React Router
+        className="text-white hover:text-gray-300 focus:text-gray-300 transition duration-200"
+      >
+        {label}
+      </Link>
+    </li>
+  );
+};
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -7,11 +22,10 @@ const Navbar: React.FC = () => {
     <nav className="bg-blue-500 text-white px-6 py-4 flex items-center justify-between shadow-md">
       {/* Logo Section */}
       <div className="flex items-center space-x-2">
-        {/* Fix the image path */}
         <img
-          src="/images.png" // Make sure this path is correct or use an import
+          src="/images.png"
           alt="Logo"
-          className="h-8 w-8 object-contain max-w-full" // Adjust styling
+          className="h-8 w-8 object-contain"
         />
         <span className="text-2xl font-semibold">Tozo</span>
       </div>
@@ -20,6 +34,7 @@ const Navbar: React.FC = () => {
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className="lg:hidden text-white focus:outline-none"
+        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -32,30 +47,29 @@ const Navbar: React.FC = () => {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d="M4 6h16M4 12h16M4 18h16"
+            d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} // Menu vs. close icon
           />
         </svg>
       </button>
 
-      {/* Navigation Links (Mobile/Tablet) */}
+      {/* Navigation Links */}
       <ul
-        className={`flex space-x-6 lg:flex ${isMenuOpen ? 'block' : 'hidden'} lg:block`}
+        className={`lg:flex lg:space-x-6 ${
+          isMenuOpen ? 'block' : 'hidden'
+        } lg:block transition-all duration-300 ease-in-out`}
+        aria-expanded={isMenuOpen ? "true" : "false"}
       >
+        <NavbarLink href="#create-task" label="Create Task" />
+        <NavbarLink href="#task-list" label="Task List" />
+        <NavbarLink href="#login" label="Login" />
+        <NavbarLink href="#register" label="Register" />
+        <NavbarLink href="#password-reset" label="Password Reset" />
+        <NavbarLink href="#change-password" label="Change Password" />
+        <NavbarLink href="#tasks" label="Tasks" />
+        
+        {/* Logout Button */}
         <li>
-          <a
-            href="#home"
-            className="text-white hover:text-gray-300 focus:text-gray-300 transition duration-200"
-          >
-            Home
-          </a>
-        </li>
-        <li>
-          <a
-            href="#settings"
-            className="text-white hover:text-gray-300 focus:text-gray-300 transition duration-200"
-          >
-            Settings
-          </a>
+          <LogoutButton />
         </li>
       </ul>
     </nav>

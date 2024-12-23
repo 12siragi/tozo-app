@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getTaskDetail, markTaskComplete } from '../api/authAPI'; // Import API functions
+import { getTaskDetail, markTaskComplete } from '../api/taskAPI'; // Import API functions
 
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

@@ -1,52 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { getTasks } from '../api/authAPI'; // Import API function
+// TaskList.tsx
+import React, { useEffect, useState } from 'react';
+import { getTasks } from '../api/taskAPI';
+
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  priority: string;
+  deadline: string;
+  category: string;
+  is_completed: boolean;
+  created_at: string;
+  updated_at: string;
+  is_deleted: boolean;
+  owner: string;
+}
 
 const TaskList: React.FC = () => {
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track errors
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch tasks when component mounts
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await getTasks();
-        setTasks(response.data); // Store tasks in state
+        const tasksData = await getTasks();
+        setTasks(tasksData);
       } catch (error) {
-        setError('Error fetching tasks. Please try again later.');
+        setError('Error fetching tasks');
       } finally {
-        setIsLoading(false); // Set loading to false after data fetch
+        setLoading(false);
       }
     };
 
     fetchTasks();
   }, []);
 
-  return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Task List</h2>
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
-      {/* Loading State */}
-      {isLoading ? (
-        <div className="text-center text-gray-500">Loading tasks...</div>
-      ) : error ? (
-        <div className="text-center text-red-500">{error}</div>
-      ) : (
-        <ul className="space-y-4">
-          {tasks.map((task) => (
-            <li key={task.id} className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow hover:shadow-md transition duration-200">
-              <span className="text-lg font-medium text-gray-700">{task.title}</span>
-              {/* Task completion button or details link */}
-              <button
-                className="text-indigo-600 hover:text-indigo-800 font-semibold"
-                onClick={() => alert(`Task ID: ${task.id}`)} // Placeholder for task action
-              >
-                Details
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+  return (
+    <div>
+      <h1>Task List</h1>
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id}>
+            <a href={`/tasks/${task.id}`}>{task.title}</a>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

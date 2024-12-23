@@ -1,10 +1,13 @@
+// LoginPage.tsx
 import React from 'react';
 import LoginForm from '../components/LoginForm';
+import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
+const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
+
   const handleLoginSuccess = () => {
-    // Handle success (e.g., redirect user to dashboard or home)
-    console.log('User logged in successfully!');
+    navigate('/create-task'); // Redirect to create-task page after successful login
   };
 
   return (
