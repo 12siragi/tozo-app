@@ -1,24 +1,13 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import RegisterPage from './pages/RegisterPage'; // Import the RegisterPage component
+import NotFoundPage from './pages/NotFoundPage'; 
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-//import PasswordResetPage from './pages/PasswordResetPage';
-import ChangePasswordPage from './pages/ChangePasswordPage';
-import NotFoundPage from './pages/NotFoundPage';
-import TaskList from './components/TaskList';
-import TaskDetail from './components/TaskDetail';
+import ChangePasswordPage from './pages/ChangePasswordPage'; 
+import TaskList from './components/TaskList'; 
 import CreateTask from './components/CreateTask';
-
-// A mock authentication check function
-const isAuthenticated = (): boolean => {
-  return localStorage.getItem('access_token') !== null;
-};
-
-// Private route component that redirects to login if not authenticated
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-  return isAuthenticated() ? children : <Navigate to="/login" />;
-};
+//import PasswordResetPage from './pages/PasswordResetPage';
 
 const App: React.FC = () => {
   return (
@@ -27,19 +16,16 @@ const App: React.FC = () => {
         {/* Navbar outside of Routes so it shows on every page */}
         <Navbar />
         <Routes>
-          {/* Public Routes */}
+          {/* Add Register route */}
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-         <Route path="change-password" element={<ChangePasswordPage />} />
-
-          {/* Private Routes (only accessible if authenticated) */}
-          <Route path="/" element={<PrivateRoute><TaskList /></PrivateRoute>} />
-          <Route path="tasks" element={<PrivateRoute><TaskList /></PrivateRoute>} />
-          <Route path="tasks/:id" element={<PrivateRoute><TaskDetail /></PrivateRoute>} />
-          <Route path="create-task" element={<PrivateRoute><CreateTask /></PrivateRoute>} />
-
-          {/* Catch-all Route for 404 Page */}
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="Change-password" element={<ChangePasswordPage />} />
+
+          <Route path="tasks" element={<TaskList />} />
+          
+          <Route path="create-task" element={<CreateTask />} /> 
+          {/* You can add other routes here as well */}
         </Routes>
       </BrowserRouter>
     </div>

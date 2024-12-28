@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
-import LogoutButton from './LogoutButton'; 
+import { Link } from 'react-router-dom';
+import LogoutButton from './LogoutButton';
 
-const NavbarLink: React.FC<{ href: string; label: string }> = ({ href, label }) => {
+interface NavbarLinkProps {
+  href: string;
+  label: string;
+}
+
+const NavbarLink: React.FC<NavbarLinkProps> = ({ href, label }) => {
   return (
     <li>
       <Link
-        to={href} // Use 'to' for navigation with React Router
+        to={href}
         className="text-white hover:text-gray-300 focus:text-gray-300 transition duration-200"
+        aria-label={label}
       >
         {label}
       </Link>
@@ -18,13 +24,15 @@ const NavbarLink: React.FC<{ href: string; label: string }> = ({ href, label }) 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+
   return (
     <nav className="bg-blue-500 text-white px-6 py-4 flex items-center justify-between shadow-md">
       {/* Logo Section */}
       <div className="flex items-center space-x-2">
         <img
           src="/images.png"
-          alt="Logo"
+          alt="Tozo Logo"
           className="h-8 w-8 object-contain"
         />
         <span className="text-2xl font-semibold">Tozo</span>
@@ -32,7 +40,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Menu Button */}
       <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        onClick={toggleMenu}
         className="lg:hidden text-white focus:outline-none"
         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
       >
@@ -47,25 +55,23 @@ const Navbar: React.FC = () => {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} // Menu vs. close icon
+            d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
           />
         </svg>
       </button>
 
       {/* Navigation Links */}
       <ul
-        className={`lg:flex lg:space-x-6 ${
-          isMenuOpen ? 'block' : 'hidden'
-        } lg:block transition-all duration-300 ease-in-out`}
+        className={`lg:flex lg:space-x-6 ${isMenuOpen ? 'block' : 'hidden'} lg:block transition-all duration-300 ease-in-out`}
         aria-expanded={isMenuOpen ? "true" : "false"}
       >
-        <NavbarLink href="#create-task" label="Create Task" />
-        <NavbarLink href="#task-list" label="Task List" />
-        <NavbarLink href="#login" label="Login" />
-        <NavbarLink href="#register" label="Register" />
-        <NavbarLink href="#password-reset" label="Password Reset" />
-        <NavbarLink href="#change-password" label="Change Password" />
-        <NavbarLink href="#tasks" label="Tasks" />
+        <NavbarLink href="/create-task" label="Create Task" />
+        <NavbarLink href="/task-list" label="Task List" />
+        <NavbarLink href="/login" label="Login" />
+        <NavbarLink href="/register" label="Register" />
+        <NavbarLink href="/password-reset" label="Password Reset" />
+        <NavbarLink href="/change-password" label="Change Password" />
+        <NavbarLink href="/tasks" label="Tasks" />
         
         {/* Logout Button */}
         <li>

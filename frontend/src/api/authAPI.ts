@@ -1,8 +1,5 @@
 import axiosClient from './axiosClient';
 
-
-
-
 // User Registration - Handles user registration
 export const register = async (userData: {
   email: string;
@@ -14,6 +11,7 @@ export const register = async (userData: {
     const response = await axiosClient.post('/auth/register/', userData);
     return response.data;
   } catch (error: any) {
+    console.error(error);
     throw new Error(error.response?.data?.detail || 'Registration failed.');
   }
 };
@@ -30,6 +28,7 @@ export const login = async (credentials: { email: string; password: string }) =>
 
     return { access, refresh };
   } catch (error: any) {
+    console.error(error);
     throw new Error(error.response?.data?.detail || 'Login failed. Check your credentials.');
   }
 };
@@ -40,6 +39,7 @@ export const requestPasswordReset = async (email: string) => {
     const response = await axiosClient.post('/auth/password-reset/', { email });
     return response.data;
   } catch (error: any) {
+    console.error(error);
     throw new Error(error.response?.data?.detail || 'Password reset request failed.');
   }
 };
@@ -58,6 +58,7 @@ export const confirmPasswordReset = async (
     });
     return response.data;
   } catch (error: any) {
+    console.error(error);
     throw new Error(error.response?.data?.detail || 'Password reset confirmation failed.');
   }
 };
@@ -71,6 +72,7 @@ export const changePassword = async (oldPassword: string, newPassword: string) =
     });
     return response.data;
   } catch (error: any) {
+    console.error(error);
     throw new Error(error.response?.data?.detail || 'Password change failed.');
   }
 };
@@ -81,6 +83,7 @@ export const verifyEmail = async (token: string, email: string) => {
     const response = await axiosClient.post('/auth/verify-email/', { token, email });
     return response.data;
   } catch (error: any) {
+    console.error(error);
     throw new Error(error.response?.data?.detail || 'Email verification failed.');
   }
 };
@@ -91,6 +94,51 @@ export const fetchCurrentUser = async () => {
     const response = await axiosClient.get('/auth/user/');
     return response.data;
   } catch (error: any) {
+    console.error(error);
     throw new Error(error.response?.data?.detail || 'Failed to fetch user data.');
+  }
+};
+
+// Fetch all tasks
+export const getTasks = async () => {
+  try {
+    const response = await axiosClient.get('/tasks/');
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error.response?.data?.detail || 'Failed to fetch tasks.');
+  }
+};
+
+// Create a new task
+export const createTask = async (task: { title: string; description: string }) => {
+  try {
+    const response = await axiosClient.post('/tasks/create/', task);
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error.response?.data?.detail || 'Failed to create task.');
+  }
+};
+
+// Fetch task details
+export const getTaskDetail = async (id: number) => {
+  try {
+    const response = await axiosClient.get(`/tasks/${id}/`);
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error.response?.data?.detail || 'Failed to fetch task details.');
+  }
+};
+
+// Mark task as complete
+export const markTaskComplete = async (id: number) => {
+  try {
+    const response = await axiosClient.patch(`/tasks/${id}/complete/`);
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error.response?.data?.detail || 'Failed to mark task as complete.');
   }
 };

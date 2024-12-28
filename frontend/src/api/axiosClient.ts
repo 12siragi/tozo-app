@@ -1,29 +1,26 @@
 import axios from 'axios';
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
 
-
-const API_URL = 'http://127.0.0.1:8000/api'; // Backend URL
-
+// Create an axios instance with the hardcoded base URL
 const axiosClient = axios.create({
-  baseURL: API_URL,
+  baseURL: 'http://127.0.0.1:8000/api', // Directly using the hardcoded URL
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor to include access tokens in request headers
+// Request interceptor to include access token
 axiosClient.interceptors.request.use(async (config) => {
   const accessToken = localStorage.getItem('access_token');
   if (accessToken) {
     const decodedToken = jwtDecode<{ exp: number }>(accessToken);
     if (decodedToken.exp * 1000 < Date.now()) {
-      // If token is expired, clear tokens from localStorage and redirect to login
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      window.location.href = '/login'; // Redirect to login page
+      // Redirect using react-router instead of full reload
+      window.location.href = '/login'; // You can use `history.push('/login')` with react-router-dom
       return Promise.reject('Token expired');
     }
-    // Include the access token in the Authorization header
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
@@ -31,13 +28,12 @@ axiosClient.interceptors.request.use(async (config) => {
   return Promise.reject(error);
 });
 
-// Interceptor to handle 401 errors and attempt token refresh
+// Response interceptor to handle 401 and refresh token
 axiosClient.interceptors.response.use(
-  (response) => response, // If response is successful, return it
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If the error is a 401 (unauthorized) and we haven't retried yet, try refreshing the token
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -46,29 +42,23 @@ axiosClient.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem('refresh_token');
-        const refreshResponse = await axios.post(`${API_URL}/auth/token/refresh/`, {
-          refresh: refreshToken,
-        });
+        const refreshResponse = await axios.post(
+          'http://127.0.0.1:8000/api/auth/token/refresh/', // Hardcoded URL for token refresh
+          { refresh: refreshToken }
+        );
 
         const { access } = refreshResponse.data;
-        // Store new access token in localStorage
         localStorage.setItem('access_token', access);
-
-        // Update Authorization header with the new access token
         originalRequest.headers.Authorization = `Bearer ${access}`;
-
-        // Retry the original request with the new token
         return axiosClient(originalRequest);
       } catch (refreshError) {
-        // If refreshing fails, clear tokens and redirect to login page
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/login'; // Redirect to login
+        window.location.href = '/login'; // Handle failed token refresh
         return Promise.reject(refreshError);
       }
     }
 
-    // If it's not a 401 error or the retry logic didn't work, reject the error
     return Promise.reject(error);
   }
 );

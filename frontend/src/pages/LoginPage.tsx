@@ -7,7 +7,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLoginSuccess = () => {
-    navigate('/create-task'); // Redirect to create-task page after successful login
+    navigate('/tasks'); 
   };
 
   return (

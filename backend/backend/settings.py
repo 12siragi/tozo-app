@@ -226,7 +226,7 @@ EMAIL_HOST_PASSWORD = 'your-email-password'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development, emails print to console
 
-CORS_ALLOW_ALL_ORIGINS = False  
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  
 ]

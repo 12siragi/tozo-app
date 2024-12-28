@@ -1,74 +1,61 @@
-from rest_framework import generics, permissions, filters
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Task
-from .serializers import TaskSerializer
+from .serializers import (
+    TaskSerializer,
+    TaskDetailSerializer,
+    TaskCreateUpdateSerializer,
+    TaskSoftDeleteSerializer
+)
 
-# Create Task
-class TaskCreateView(generics.CreateAPIView):
+
+class TaskListCreateView(generics.ListCreateAPIView):
     """
-    Handles creating a new task.
+    List all tasks or create a new task.
     """
+    queryset = Task.objects.filter(is_deleted=False)  # Exclude soft-deleted tasks
+    permission_classes = [IsAuthenticated]  # Only authenticated users can create tasks
     serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        # Automatically assign the task to the currently logged-in user
-        serializer.save(owner=self.request.user)
-
-
-# List Tasks
-class TaskListView(generics.ListAPIView):
-    """
-    Handles listing all tasks for the authenticated user.
-    Includes filtering, searching, and ordering.
-    """
-    serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
-    filterset_fields = ['priority', 'category', 'is_completed']
-    ordering_fields = ['deadline', 'priority']
-    search_fields = ['title', 'description']
-
-    def get_queryset(self):
-        # Return only the authenticated user's tasks that are not soft-deleted
-        return Task.objects.filter(owner=self.request.user, is_deleted=False)
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return TaskCreateUpdateSerializer  # Use a different serializer for POST requests
+        return TaskSerializer
 
 
-# Retrieve, Update, Delete Task
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Handles retrieving, updating, or deleting a specific task.
+    Retrieve, update, or delete a specific task.
     """
-    serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    queryset = Task.objects.all()
+    permission_classes = [IsAuthenticated]  # Only authenticated users can view, update, or delete tasks
 
-    def get_queryset(self):
-        # Return only the authenticated user's tasks that are not soft-deleted
-        return Task.objects.filter(owner=self.request.user, is_deleted=False)
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return TaskCreateUpdateSerializer  # Use the same serializer for update requests
+        return TaskDetailSerializer  # Default serializer for GET requests
 
     def perform_destroy(self, instance):
-        # Perform a soft delete by setting `is_deleted` to True
+        """
+        Override the default delete behavior to implement soft delete.
+        """
         instance.is_deleted = True
         instance.save()
 
 
-# Mark Task as Complete
-class MarkTaskCompleteView(APIView):
+class TaskSoftDeleteView(generics.UpdateAPIView):
     """
-    Custom view to mark a task as completed.
+    Update the is_deleted field to implement soft delete.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    queryset = Task.objects.all()
+    serializer_class = TaskSoftDeleteSerializer
+    permission_classes = [IsAuthenticated]  # Only authenticated users can perform soft delete
 
-    def post(self, request, pk):
-        try:
-            # Find the task for the authenticated user that is not soft-deleted
-            task = Task.objects.get(pk=pk, owner=request.user, is_deleted=False)
-            if task.is_completed:
-                return Response({'message': 'Task is already completed!'})
-            task.is_completed = True
-            task.save()
-            return Response({'message': 'Task marked as completed!'})
-        except Task.DoesNotExist:
-            return Response({'error': 'Task not found'}, status=404)
+
+class TaskCompletedListView(generics.ListAPIView):
+    """
+    List all completed tasks.
+    """
+    queryset = Task.objects.filter(is_completed=True, is_deleted=False)  # Only non-deleted completed tasks
+    serializer_class = TaskSerializer
+    permission_classes = [AllowAny]  # Publicly accessible, anyone can view completed tasks

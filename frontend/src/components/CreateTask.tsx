@@ -1,84 +1,74 @@
-// CreateTask.tsx
 import React, { useState } from 'react';
 import { createTask } from '../api/taskAPI';
-
-export interface Task {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  deadline: string;
-  category: string;
-  is_completed: boolean;
-  created_at: string;
-  updated_at: string;
-  is_deleted: boolean;
-  owner: string;
-}
 
 const CreateTask: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('');
+  const [priority, setPriority] = useState('Medium');
   const [deadline, setDeadline] = useState('');
-  const [category, setCategory] = useState('');
-  const [owner, setOwner] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [category, setCategory] = useState('Work'); // Default category set to 'Work'
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    const newTask = { title, description, priority, deadline, category, owner, is_completed: false, is_deleted: false };
-    
     try {
+      const newTask = {
+        title,
+        description,
+        priority,
+        deadline,
+        category,
+        is_completed: false,
+        is_deleted: false,
+        owner: 'current_user', // Replace with actual owner info
+      };
       await createTask(newTask);
-      setSuccessMessage('Task created successfully');
-      // Reset form fields
+      alert('Task created successfully!');
       setTitle('');
       setDescription('');
-      setPriority('');
+      setPriority('Medium');
       setDeadline('');
-      setCategory('');
-      setOwner('');
+      setCategory('Work'); // Reset category to 'Work' after form submission
     } catch (error) {
-      setError('Error creating task');
+      console.error('Error creating task:', error);
     }
   };
 
   return (
-    <div>
-      <h1>Create New Task</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        </div>
-        <div>
-          <label>Description</label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
-        </div>
-        <div>
-          <label>Priority</label>
-          <input type="text" value={priority} onChange={(e) => setPriority(e.target.value)} required />
-        </div>
-        <div>
-          <label>Deadline</label>
-          <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} required />
-        </div>
-        <div>
-          <label>Category</label>
-          <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} required />
-        </div>
-        <div>
-          <label>Owner</label>
-          <input type="text" value={owner} onChange={(e) => setOwner(e.target.value)} required />
-        </div>
-        <button type="submit">Create Task</button>
-      </form>
-      {error && <p>{error}</p>}
-      {successMessage && <p>{successMessage}</p>}
-    </div>
+    <form onSubmit={handleSubmit}>
+      <h2>Create Task</h2>
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <textarea
+        placeholder="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        required
+      />
+      <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+      <input
+        type="date"
+        value={deadline}
+        onChange={(e) => setDeadline(e.target.value)}
+        required
+      />
+      <select value={category} onChange={(e) => setCategory(e.target.value)} required>
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Urgent">Urgent</option>
+        <option value="Other">Other</option>
+      </select>
+      <button type="submit">Create Task</button>
+    </form>
   );
 };
 

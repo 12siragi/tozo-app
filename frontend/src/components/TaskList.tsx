@@ -1,56 +1,57 @@
-// TaskList.tsx
+// src/components/TasksList.tsx
 import React, { useEffect, useState } from 'react';
-import { getTasks } from '../api/taskAPI';
+import { getTasks, markTaskComplete, softDeleteTask, Task } from '../api/taskAPI';
 
-export interface Task {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  deadline: string;
-  category: string;
-  is_completed: boolean;
-  created_at: string;
-  updated_at: string;
-  is_deleted: boolean;
-  owner: string;
-}
-
-const TaskList: React.FC = () => {
+const TasksList: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const fetchTasks = async () => {
+    try {
+      const data = await getTasks();
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
+
+  const handleCompleteTask = async (taskId: number) => {
+    try {
+      await markTaskComplete(taskId);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error marking task as complete:', error);
+    }
+  };
+
+  const handleSoftDeleteTask = async (taskId: number) => {
+    try {
+      await softDeleteTask(taskId);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error soft-deleting task:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const tasksData = await getTasks();
-        setTasks(tasksData);
-      } catch (error) {
-        setError('Error fetching tasks');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTasks();
   }, []);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
     <div>
       <h1>Task List</h1>
-      <ul>
-        {tasks.map((task) => (
-          <li key={task.id}>
-            <a href={`/tasks/${task.id}`}>{task.title}</a>
-          </li>
-        ))}
-      </ul>
+      {tasks.map((task) => (
+        <div key={task.id}>
+          <h2>{task.title}</h2>
+          <p>{task.description}</p>
+          <p>Priority: {task.priority}</p>
+          <p>Deadline: {task.deadline}</p>
+          <p>Status: {task.is_completed ? 'Completed' : 'Pending'}</p>
+          <button onClick={() => handleCompleteTask(task.id)}>Mark Complete</button>
+          <button onClick={() => handleSoftDeleteTask(task.id)}>Soft Delete</button>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default TaskList;
+export default TasksList;
