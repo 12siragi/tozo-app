@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import LogoutButton from './LogoutButton';
 
 interface NavbarLinkProps {
@@ -8,12 +8,16 @@ interface NavbarLinkProps {
 }
 
 const NavbarLink: React.FC<NavbarLinkProps> = ({ href, label }) => {
+  const location = useLocation();
+  const isActive = location.pathname === href;
+
   return (
     <li>
       <Link
         to={href}
-        className="text-white hover:text-gray-300 focus:text-gray-300 transition duration-200"
+        className={`text-white hover:text-gray-300 focus:text-gray-300 transition duration-200 ${isActive ? 'text-blue-300' : ''}`}
         aria-label={label}
+        aria-current={isActive ? 'page' : undefined}
       >
         {label}
       </Link>
@@ -62,7 +66,7 @@ const Navbar: React.FC = () => {
 
       {/* Navigation Links */}
       <ul
-        className={`lg:flex lg:space-x-6 ${isMenuOpen ? 'block' : 'hidden'} lg:block transition-all duration-300 ease-in-out`}
+        className={`lg:flex lg:space-x-6 ${isMenuOpen ? 'absolute bg-blue-500 left-0 right-0 top-16 px-6 py-4 block' : 'hidden'} transition-all duration-300 ease-in-out lg:block lg:static`}
         aria-expanded={isMenuOpen ? "true" : "false"}
       >
         <NavbarLink href="/create-task" label="Create Task" />
