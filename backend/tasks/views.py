@@ -1,21 +1,21 @@
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from .models import Task
-from .serializers import (
-    TaskSerializer,
-    TaskDetailSerializer,
-    TaskCreateUpdateSerializer,
-    TaskSoftDeleteSerializer
-)
+from .serializers import TaskSerializer, TaskCreateUpdateSerializer, TaskDetailSerializer, TaskSoftDeleteSerializer
 
 
 class TaskListCreateView(generics.ListCreateAPIView):
     """
-    List all tasks or create a new task.
+    List all tasks for the authenticated user or create a new task.
     """
-    queryset = Task.objects.filter(is_deleted=False)  # Exclude soft-deleted tasks
     permission_classes = [IsAuthenticated]  # Only authenticated users can create tasks
     serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        """
+        Override to filter tasks by the authenticated user.
+        """
+        return Task.objects.filter(owner=self.request.user, is_deleted=False)  # Filter by logged-in user
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -25,10 +25,15 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Retrieve, update, or delete a specific task.
+    Retrieve, update, or delete a specific task for the authenticated user.
     """
-    queryset = Task.objects.all()
     permission_classes = [IsAuthenticated]  # Only authenticated users can view, update, or delete tasks
+
+    def get_queryset(self):
+        """
+        Override to filter tasks by the authenticated user.
+        """
+        return Task.objects.filter(owner=self.request.user, is_deleted=False)  # Filter by logged-in user
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
@@ -54,8 +59,13 @@ class TaskSoftDeleteView(generics.UpdateAPIView):
 
 class TaskCompletedListView(generics.ListAPIView):
     """
-    List all completed tasks.
+    List all completed tasks for the authenticated user.
     """
-    queryset = Task.objects.filter(is_completed=True, is_deleted=False)  # Only non-deleted completed tasks
+    permission_classes = [IsAuthenticated]  # Only authenticated users can view their completed tasks
     serializer_class = TaskSerializer
-    permission_classes = [AllowAny]  # Publicly accessible, anyone can view completed tasks
+
+    def get_queryset(self):
+        """
+        Filter completed tasks for the authenticated user.
+        """
+        return Task.objects.filter(owner=self.request.user, is_completed=True, is_deleted=False)

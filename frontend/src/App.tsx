@@ -7,7 +7,7 @@ import LoginPage from './pages/LoginPage';
 import ChangePasswordPage from './pages/ChangePasswordPage'; 
 import TaskList from './components/TaskList'; 
 import CreateTask from './components/CreateTask';
-import SingleTask from './components/SingleTask.tsx';
+//import SingleTask from './components/SingleTask.tsx';
 //import PasswordResetPage from './pages/PasswordResetPage';
 
 const App: React.FC = () => {
@@ -24,7 +24,7 @@ const App: React.FC = () => {
           <Route path="Change-password" element={<ChangePasswordPage />} />
 
           <Route path="tasks" element={<TaskList />} />
-          <Route path="SingleTask" element={<SingleTask />} />
+          
           <Route path="create-task" element={<CreateTask />} /> 
           {/* You can add other routes here as well */}
         </Routes>
