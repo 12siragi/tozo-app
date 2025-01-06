@@ -77,10 +77,11 @@ class PasswordResetAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            # In a real implementation, you would send an email here
+            token = default_token_generator.make_token(UserModel.objects.get(email=email))  # Generate the reset token
+            reset_url = f"http://localhost:8000/api/reset-password/?token={token}&email={email}"
             send_mail(
                 'Password Reset Request',
-                'Click the link below to reset your password.',
+                f'Click the link below to reset your password:\n{reset_url}',
                 'no-reply@example.com',
                 [email],
                 fail_silently=False,
@@ -157,14 +158,13 @@ def validate_google_token(request):
 class EmailVerificationAPIView(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request, *args, **kwargs):
-        token = request.query_params.get('token')
-        email = request.query_params.get('email')
+    def post(self, request, *args, **kwargs):
+        token = request.query_params.get('token')  # Change to query_params
+        email = request.query_params.get('email')  # Change to query_params
 
         if not token or not email:
             return Response({"detail": "Token or email missing."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Use the email to get the user and validate the token
         try:
             user = UserModel.objects.get(email=email)
         except UserModel.DoesNotExist:
@@ -173,13 +173,12 @@ class EmailVerificationAPIView(APIView):
         if not default_token_generator.check_token(user, token):
             return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Mark email as verified (you can update a user field or take other actions here)
         user.is_active = True
         user.save()
 
         return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
 
-
+# User Detail API View
 class UserDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserDetailSerializer
