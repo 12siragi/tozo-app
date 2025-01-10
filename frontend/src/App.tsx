@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout, Switch } from "antd";
 
 import HeaderComponent from "./components/Header";
-import SoftDeleteTask from "./components/SoftDeleteTask";
 import SidebarComponent from "./components/Sidebar";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
