@@ -2,9 +2,17 @@ import React from "react";
 import { Row, Col } from "antd";
 import { Link } from "react-router-dom";
 
-const Header: React.FC = () => {
+const HeaderComponent: React.FC = () => {
   return (
-    <header style={{ backgroundColor: "#1A4D8A", padding: "10px" }}>
+    <header
+      style={{
+        background: "#1A4D8A",
+        padding: "0 20px",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+        height: "60px", // Increased height
+        lineHeight: "80px", // Adjust line height to center text vertically
+      }}
+    >
       <Row justify="end">
         <Col>
           <Link to="/login" style={{ color: "#fff", marginLeft: 20 }}>
@@ -21,4 +29,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default HeaderComponent;

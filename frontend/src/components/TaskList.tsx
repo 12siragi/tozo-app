@@ -5,43 +5,61 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const TasksList: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loadingFetch, setLoadingFetch] = useState<boolean>(false);
+  const [loadingComplete, setLoadingComplete] = useState<number | null>(null); // Track which task is being completed
+  const [loadingDelete, setLoadingDelete] = useState<number | null>(null); // Track which task is being deleted
   const [error, setError] = useState<string | null>(null);
 
   const fetchTasks = async () => {
-    setLoading(true);
+    setLoadingFetch(true);
     setError(null);
     try {
       const data = await getTasks();
       setTasks(data);
     } catch (error) {
+      setError('Error fetching tasks. Please try again later.');
       toast.error('Error fetching tasks. Please try again later.');
     } finally {
-      setLoading(false);
+      setLoadingFetch(false);
     }
   };
 
   const handleCompleteTask = async (taskId: number) => {
-    setLoading(true);
+    setLoadingComplete(taskId);
+    
+    // Optimistic update: mark the task as complete immediately in the UI
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId ? { ...task, is_completed: true } : task
+      )
+    );
+
     try {
       await markTaskComplete(taskId);
+      // Optionally, you can fetch the tasks again if needed (for full confirmation)
       fetchTasks();
     } catch (error) {
+      // If error occurs, revert the task completion state
       toast.error('Error marking task as complete.');
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === taskId ? { ...task, is_completed: false } : task
+        )
+      );
     } finally {
-      setLoading(false);
+      setLoadingComplete(null);
     }
   };
 
   const handleSoftDeleteTask = async (taskId: number) => {
-    setLoading(true);
+    setLoadingDelete(taskId);
     try {
       await softDeleteTask(taskId);
       fetchTasks();
     } catch (error) {
       toast.error('Error soft-deleting task.');
     } finally {
-      setLoading(false);
+      setLoadingDelete(null);
     }
   };
 
@@ -52,10 +70,12 @@ const TasksList: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-2xl font-semibold text-center mb-6">Task List</h1>
-        {loading ? (
-          <div className="space-y-4">
+      <div className="p-6 max-w-6xl mx-auto">
+        <h1 className="text-3xl font-semibold text-center mb-8 text-blue-700">Task List</h1>
+        
+        {/* Loading State */}
+        {loadingFetch ? (
+          <div className="space-y-6">
             {[...Array(5)].map((_, index) => (
               <div key={index} className="bg-gray-200 p-4 rounded-lg shadow-lg animate-pulse">
                 <div className="h-6 bg-gray-400 rounded w-1/3 mb-4"></div>
@@ -65,18 +85,18 @@ const TasksList: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
               >
-                <h2 className="text-xl font-semibold dark:text-white">{task.title}</h2>
-                <p className="text-gray-700 dark:text-gray-300">{task.description}</p>
-                <div className="mt-2 text-sm text-gray-500">
-                  <p>Priority: <span className="font-medium">{task.priority}</span></p>
-                  <p>Deadline: <span className="font-medium">{task.deadline}</span></p>
-                  <p>Status: 
+                <h2 className="text-2xl font-semibold dark:text-white mb-3">{task.title}</h2>
+                <p className="text-gray-700 dark:text-gray-300 mb-4">{task.description}</p>
+                <div className="space-y-2 mb-4 text-sm text-gray-500">
+                  <p><strong>Priority:</strong> <span className="font-medium">{task.priority}</span></p>
+                  <p><strong>Deadline:</strong> <span className="font-medium">{task.deadline}</span></p>
+                  <p><strong>Status:</strong> 
                     <span 
                       className={`inline-block px-3 py-1 rounded-full text-white 
                       ${task.is_completed ? 'bg-green-500' : 'bg-yellow-500'}`}>
@@ -84,27 +104,33 @@ const TasksList: React.FC = () => {
                     </span>
                   </p>
                 </div>
-                <div className="mt-4 space-x-2">
+                <div className="mt-6 flex space-x-4">
                   <button
                     onClick={() => handleCompleteTask(task.id)}
-                    className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    disabled={task.is_completed || loading}
+                    className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+                    disabled={task.is_completed || loadingComplete !== null}
                   >
-                    {loading ? 'Completing...' : 'Mark Complete'}
+                    {loadingComplete === task.id ? 'Completing...' : 'Mark Complete'}
                   </button>
                   <button
                     onClick={() => handleSoftDeleteTask(task.id)}
-                    className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                    disabled={loading}
+                    className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+                    disabled={loadingDelete === task.id}
                   >
-                    {loading ? 'Deleting...' : 'Soft Delete'}
+                    {loadingDelete === task.id ? 'Deleting...' : 'Soft Delete'}
                   </button>
                 </div>
               </div>
             ))}
           </div>
         )}
-        {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+        
+        {/* Error State */}
+        {error && (
+          <div className="text-red-500 text-center mt-4 text-lg">
+            {error}
+          </div>
+        )}
       </div>
     </>
   );

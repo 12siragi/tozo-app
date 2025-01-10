@@ -1,16 +1,19 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import { Layout, Menu, Row, Col } from "antd";
-import { UserAddOutlined, LoginOutlined, LockOutlined, AppstoreAddOutlined, CheckCircleOutlined, FileTextOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Layout, Switch } from "antd";
 
+import HeaderComponent from "./components/Header";
+import SoftDeleteTask from "./components/SoftDeleteTask";
+import SidebarComponent from "./components/Sidebar";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import TaskList from "./components/TaskList";
 import CreateTask from "./components/CreateTask";
 import NotFoundPage from "./pages/NotFoundPage";
+import PasswordReset from "./components/PasswordReset"; // Import the PasswordReset component
 
-const { Header, Sider, Content } = Layout;
+const { Sider, Content } = Layout;
 
 const routes: { path: string; element: React.ReactNode }[] = [
   { path: "/register", element: <RegisterPage /> },
@@ -18,61 +21,61 @@ const routes: { path: string; element: React.ReactNode }[] = [
   { path: "/change-password", element: <ChangePasswordPage /> },
   { path: "/tasks", element: <TaskList /> },
   { path: "/create-task", element: <CreateTask /> },
+  { path: "/password-reset", element: <PasswordReset /> }, // Add PasswordReset route
   { path: "*", element: <NotFoundPage /> },
 ];
 
 const App: React.FC = () => {
+  const [darkMode, setDarkMode] = useState<boolean>(
+    () => localStorage.getItem("darkMode") === "true"
+  );
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode.toString());
+  }, [darkMode]);
+
+  const themeStyles = {
+    layout: {
+      minHeight: "100vh",
+      backgroundColor: darkMode ? "#1f1f1f" : "#f5f5f5",
+    },
+    sider: {
+      backgroundColor: darkMode ? "#2a2a2a" : "#ffffff",
+      borderRight: darkMode ? "1px solid #444" : "1px solid #ddd",
+    },
+    content: {
+      backgroundColor: darkMode ? "#292929" : "#f9f9f9",
+      color: darkMode ? "#ffffff" : "#000000",
+      borderRadius: "8px",
+      boxShadow: darkMode
+        ? "0 2px 10px rgba(255,255,255,0.1)"
+        : "0 2px 10px rgba(0,0,0,0.1)",
+    },
+  };
+
   return (
     <BrowserRouter>
-      <Layout style={{ minHeight: "100vh" }}>
+      <Layout style={themeStyles.layout}>
         {/* Header */}
-        <Header style={{ background: "#1A4D8A", padding: "0 20px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
-          <Row justify="end">
-            <Col>
-              <Link to="/login" style={{ color: "#fff", marginLeft: 20 }}>
-                Login
-              </Link>
-            </Col>
-            <Col>
-              <Link to="/register" style={{ color: "#fff", marginLeft: 20 }}>
-                Register
-              </Link>
-            </Col>
-          </Row>
-        </Header>
+        <HeaderComponent>
+          {/* Dark Mode Toggle */}
+          <Switch
+            checked={darkMode}
+            onChange={() => setDarkMode(!darkMode)}
+            checkedChildren="Dark"
+            unCheckedChildren="Light"
+          />
+        </HeaderComponent>
 
         {/* Sidebar */}
         <Layout>
-          <Sider width={250} className="site-layout-background" style={{ backgroundColor: "#ffffff", borderRight: "1px solid #ddd" }}>
-            <Menu mode="inline" theme="light" style={{ height: "100%", borderRight: 0 }}>
-              <Menu.Item key="1" icon={<UserAddOutlined />}>
-                <Link to="/register">Register</Link>
-              </Menu.Item>
-              <Menu.Item key="2" icon={<LoginOutlined />}>
-                <Link to="/login">Login</Link>
-              </Menu.Item>
-              <Menu.Item key="3" icon={<LockOutlined />}>
-                <Link to="/change-password">Change Password</Link>
-              </Menu.Item>
-              <Menu.Item key="4" icon={<AppstoreAddOutlined />}>
-                <Link to="/tasks">Task List</Link>
-              </Menu.Item>
-              <Menu.Item key="5" icon={<AppstoreAddOutlined />}>
-                <Link to="/create-task">Create Task</Link>
-              </Menu.Item>
-              {/* Static Menu Items */}
-              <Menu.Item key="6" icon={<CheckCircleOutlined />}>
-                Completed
-              </Menu.Item>
-              <Menu.Item key="7" icon={<FileTextOutlined />}>
-                Task Detail
-              </Menu.Item>
-            </Menu>
+          <Sider width={250} style={themeStyles.sider}>
+            <SidebarComponent />
           </Sider>
 
           {/* Main Content */}
           <Layout style={{ padding: "24px" }}>
-            <Content style={{ padding: 24, margin: 0, minHeight: 280, backgroundColor: "#f9f9f9", borderRadius: "8px" }}>
+            <Content style={themeStyles.content}>
               <Routes>
                 {routes.map((route, index) => (
                   <Route key={index} path={route.path} element={route.element} />
