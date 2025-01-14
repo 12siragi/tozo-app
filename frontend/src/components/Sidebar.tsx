@@ -33,7 +33,7 @@ const SidebarComponent: React.FC = () => {
     { key: "/tasks", icon: <AppstoreAddOutlined />, label: "Task List" },
     { key: "/create-task", icon: <AppstoreAddOutlined />, label: "Create Task" },
     { key: "/completed", icon: <CheckCircleOutlined />, label: "Completed" },
-    { key: "/task-detail", icon: <FileTextOutlined />, label: "Task Detail" },
+    { key: "/archived-tasks", icon: <FileTextOutlined />, label: "Archived Task" }, // Updated label and route
     { key: "/password-reset", icon: <UnlockOutlined />, label: "Password Reset" },
     {
       key: "/logout",

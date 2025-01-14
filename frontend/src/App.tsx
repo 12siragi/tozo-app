@@ -9,8 +9,9 @@ import LoginPage from "./pages/LoginPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import TaskList from "./components/TaskList";
 import CreateTask from "./components/CreateTask";
+import ArchivedTasks from "./components/ArchivedTasks"; // Import ArchivedTasks
 import NotFoundPage from "./pages/NotFoundPage";
-import PasswordReset from "./components/PasswordReset"; // Import the PasswordReset component
+import PasswordReset from "./components/PasswordReset"; // Import PasswordReset
 
 const { Sider, Content } = Layout;
 
@@ -20,7 +21,8 @@ const routes: { path: string; element: React.ReactNode }[] = [
   { path: "/change-password", element: <ChangePasswordPage /> },
   { path: "/tasks", element: <TaskList /> },
   { path: "/create-task", element: <CreateTask /> },
-  { path: "/password-reset", element: <PasswordReset /> }, // Add PasswordReset route
+  { path: "/archived-tasks", element: <ArchivedTasks /> }, // Add ArchivedTasks route
+  { path: "/password-reset", element: <PasswordReset /> },
   { path: "*", element: <NotFoundPage /> },
 ];
 

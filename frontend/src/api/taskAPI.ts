@@ -1,4 +1,3 @@
-
 import axiosClient from './axiosClient';
 
 // Utility functions for interacting with the API
@@ -61,12 +60,43 @@ export const markTaskComplete = async (taskId: number): Promise<void> => {
   }
 };
 
+// Mark a task as incomplete
+export const markTaskIncomplete = async (taskId: number): Promise<void> => {
+  try {
+    await axiosClient.patch(`/tasks/${taskId}/`, { is_completed: false });
+  } catch (error: any) {
+    console.error('Error marking task as incomplete:', error.response || error.message);
+    throw error;
+  }
+};
+
 // Soft delete a task
 export const softDeleteTask = async (taskId: number): Promise<void> => {
   try {
     await axiosClient.patch(`/tasks/${taskId}/soft-delete/`, { is_deleted: true });
   } catch (error: any) {
     console.error('Error soft-deleting task:', error.response || error.message);
+    throw error;
+  }
+};
+
+// Fetch archived tasks
+export const fetchArchivedTasks = async (): Promise<Task[]> => {
+  try {
+    const response = await axiosClient.get('/tasks/archive/');
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching archived tasks:', error.response || error.message);
+    throw error;
+  }
+};
+
+// Restore a soft-deleted task
+export const restoreTask = async (taskId: number): Promise<void> => {
+  try {
+    await axiosClient.patch(`/tasks/${taskId}/restore/`, { is_deleted: false });
+  } catch (error: any) {
+    console.error('Error restoring task:', error.response || error.message);
     throw error;
   }
 };
